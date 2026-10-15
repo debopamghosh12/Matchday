@@ -199,7 +199,7 @@ export function DateSlider({ selectedDate, onSelect }: DateSliderProps) {
         onScroll={onScroll}
         onScrollEnd={() => (programmaticUntil.current = 0)}
         onKeyDown={onKeyDown}
-        className="no-scrollbar relative flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 py-1 [overflow-anchor:none] [mask-image:linear-gradient(to_right,transparent,black_1.5rem,black_calc(100%-1.5rem),transparent)] sm:mx-11 sm:snap-proximity sm:px-1"
+        className="no-scrollbar relative flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 py-2 [overflow-anchor:none] [mask-image:linear-gradient(to_right,transparent,black_1.5rem,black_calc(100%-1.5rem),transparent)] sm:mx-11 sm:snap-proximity sm:px-1"
       >
         {/* Half-width spacers let the first/last pills scroll to the centre too. */}
         <span className={EDGE_SPACER} aria-hidden />
@@ -245,21 +245,23 @@ function DayPill({ date, count, isSelected, isToday, onClick }: DayPillProps) {
       tabIndex={isSelected ? 0 : -1}
       aria-current={isSelected ? 'date' : undefined}
       aria-label={label.trim()}
-      className={`relative flex w-14 shrink-0 snap-center flex-col items-center rounded-xl border py-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+      className={`relative flex w-14 shrink-0 snap-center flex-col items-center rounded-md border-2 py-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-highlight ${
         isSelected
-          ? 'border-accent bg-accent text-accent-fg'
-          : `border-line bg-surface hover:border-accent/50 ${empty ? 'opacity-45 hover:opacity-80' : ''}`
+          ? 'border-ink bg-accent text-accent-fg shadow-poster-sm'
+          : empty
+            ? 'border-dashed border-line text-muted hover:border-ink' // no matches: quieter, but still AA-readable
+            : 'border-ink bg-surface hover:bg-surface-2'
       }`}
     >
       <span
         className={`text-[10px] font-semibold uppercase tracking-wide ${
-          isToday ? (isSelected ? '' : 'text-accent') : isSelected ? 'opacity-80' : 'text-muted'
+          isToday ? (isSelected ? '' : 'text-highlight') : isSelected ? '' : 'text-muted'
         }`}
       >
         {isToday ? 'Today' : formatDateKey(date, 'EEE')}
       </span>
-      <span className="text-lg leading-6 font-bold tabular-nums">{formatDateKey(date, 'd')}</span>
-      <span className={`text-[10px] font-medium uppercase ${isSelected ? 'opacity-80' : 'text-muted'}`}>
+      <span className="font-display text-2xl leading-6 tracking-wide tabular-nums">{formatDateKey(date, 'd')}</span>
+      <span className={`text-[10px] font-semibold uppercase ${isSelected ? '' : 'text-muted'}`}>
         {formatDateKey(date, 'MMM')}
       </span>
 
@@ -270,7 +272,7 @@ function DayPill({ date, count, isSelected, isToday, onClick }: DayPillProps) {
         ) : typeof count === 'number' && count > 0 ? (
           <span
             className={`min-w-5 rounded-full px-1.5 text-center text-[10px] leading-4 font-bold tabular-nums ${
-              isSelected ? 'bg-accent-fg/20' : 'bg-surface-2 text-fg'
+              isSelected ? 'bg-ink text-cream' : 'bg-surface-2 text-fg'
             }`}
           >
             {count}
@@ -279,7 +281,7 @@ function DayPill({ date, count, isSelected, isToday, onClick }: DayPillProps) {
       </span>
 
       {isToday && !isSelected && (
-        <span className="absolute top-1 right-1 size-1.5 rounded-full bg-accent" aria-hidden />
+        <span className="absolute -top-1.5 -right-1.5 size-3 rounded-full border-2 border-ink bg-gold" aria-hidden />
       )}
     </button>
   )
@@ -291,7 +293,7 @@ function ArrowButton({ direction, onClick }: { direction: -1 | 1; onClick: () =>
       type="button"
       onClick={onClick}
       aria-label={direction === -1 ? 'Scroll to earlier days' : 'Scroll to later days'}
-      className={`absolute top-1/2 z-10 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-surface text-muted shadow-sm transition-colors hover:border-accent/50 hover:text-fg sm:flex ${
+      className={`absolute top-1/2 z-10 hidden size-9 -translate-y-1/2 items-center justify-center rounded-md border-2 border-ink bg-surface shadow-poster-sm transition-colors hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-highlight sm:flex ${
         direction === -1 ? 'left-0' : 'right-0'
       }`}
     >

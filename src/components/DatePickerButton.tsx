@@ -25,7 +25,7 @@ export function DatePickerButton({ value, onSelect }: DatePickerButtonProps) {
       <button
         type="button"
         onClick={open}
-        className="flex h-9 items-center gap-2 rounded-lg border border-line bg-surface px-3 text-sm font-medium text-muted transition-colors hover:border-accent/50 hover:text-fg"
+        className="flex h-10 items-center gap-2 rounded-md border-2 border-ink bg-surface px-3 text-sm font-bold shadow-poster-sm transition-transform hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-highlight active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
       >
         <svg viewBox="0 0 20 20" fill="currentColor" className="size-4" aria-hidden>
           <path

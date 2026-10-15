@@ -3,36 +3,62 @@
 /* Dark mode is driven by a `.dark` class on <html> (dark is the default). */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Colour tokens. Light values here; dark overrides below. */
+/*
+ * Screen-print palette taken from the hero artwork. Raw colours are fixed;
+ * the semantic tokens below them switch between light (here) and dark (.dark).
+ * Every text pairing is checked for WCAG AA (4.5:1) in both themes.
+ */
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Bebas Neue", "Anton", Impact, "Arial Narrow", sans-serif;
 
-  --color-bg: #f3f5f8;
-  --color-surface: #ffffff;
-  --color-surface-2: #eceff4;
-  --color-line: #dde2ea;
-  --color-fg: #0f172a;
-  --color-muted: #5d687a;
-  --color-accent: #059669;
-  --color-accent-fg: #ffffff;
-  --color-live: #dc2626;
+  --color-cobalt: #2f5fb3;
+  --color-cobalt-deep: #1e3f80;
+  --color-flare: #e8452c;
+  --color-cream: #f4eedf;
+  --color-ink: #141414;
+  --color-gold: #f2b531;
+
+  --color-bg: var(--color-cream);
+  --color-surface: #fffbf1;
+  --color-surface-2: #e8dfc9;
+  --color-line: #d6cbb1;
+  --color-fg: var(--color-ink);
+  --color-muted: #5c5546;
+  --color-accent: var(--color-flare); /* fills: selected pill, live badge, buttons */
+  --color-accent-fg: var(--color-ink);
+  --color-highlight: var(--color-cobalt); /* accent-coloured text and focus rings */
+  --color-live: var(--color-flare);
+
+  --shadow-poster: 4px 4px 0 var(--color-ink);
+  --shadow-poster-sm: 2px 2px 0 var(--color-ink);
+  --shadow-poster-live: 4px 4px 0 var(--color-flare);
 }
 
 .dark {
-  --color-bg: #0a0e15;
-  --color-surface: #121924;
-  --color-surface-2: #1a2331;
-  --color-line: #232e40;
-  --color-fg: #e7ecf3;
-  --color-muted: #8a96a9;
-  --color-accent: #34d399;
-  --color-accent-fg: #052e1f;
-  --color-live: #f87171;
+  --color-bg: var(--color-cobalt-deep);
+  --color-surface: #132a57;
+  --color-surface-2: #24488c;
+  --color-line: #2c5296;
+  --color-fg: var(--color-cream);
+  --color-muted: #bfcae0;
+  --color-highlight: var(--color-gold);
   color-scheme: dark;
 }
 
 body {
-  @apply bg-bg text-fg antialiased;
+  @apply bg-bg font-sans text-fg antialiased;
+}
+
+/* Paper grain over the whole page, like a screen print. Never intercepts clicks. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* Horizontal strips that scroll by touch/arrows without a visible scrollbar. */

@@ -21,7 +21,7 @@ function TeamRow({ team, goals, dimmed }: { team: TeamRef; goals: number | null;
       <span className="min-w-0 flex-1 truncate font-medium" title={team.name ?? undefined}>
         {teamName(team)}
       </span>
-      {goals !== null && <span className="w-6 text-right text-base font-bold tabular-nums">{goals}</span>}
+      {goals !== null && <span className="w-6 text-right font-display text-2xl leading-none tabular-nums">{goals}</span>}
     </div>
   )
 }
@@ -37,8 +37,8 @@ export function MatchCard({ match, showCompetition = false }: MatchCardProps) {
 
   return (
     <article
-      className={`rounded-xl border bg-surface p-3 transition-colors hover:border-accent/50 sm:p-4 ${
-        kind === 'live' ? 'border-live/40' : 'border-line'
+      className={`rounded-md border-2 border-ink bg-surface p-3 sm:p-4 ${
+        kind === 'live' ? 'shadow-poster-live' : 'shadow-poster'
       }`}
     >
       <div className="flex items-center justify-between gap-2">

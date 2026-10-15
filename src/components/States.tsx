@@ -6,12 +6,12 @@ export function MatchListSkeleton({ groups = 2, cards = 3 }: { groups?: number; 
       {Array.from({ length: groups }, (_, g) => (
         <div key={g} className="animate-pulse">
           <div className="mb-3 flex items-center gap-2.5">
-            <div className="size-8 rounded-lg bg-surface-2" />
-            <div className="h-4 w-40 rounded bg-surface-2" />
+            <div className="size-9 rounded-md bg-surface-2" />
+            <div className="h-6 w-44 rounded bg-surface-2" />
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: cards }, (_, c) => (
-              <div key={c} className="h-[132px] rounded-xl border border-line bg-surface p-4">
+              <div key={c} className="h-[136px] rounded-md border-2 border-ink bg-surface p-4 shadow-poster">
                 <div className="flex justify-between">
                   <div className="h-4 w-24 rounded bg-surface-2" />
                   <div className="h-4 w-16 rounded-full bg-surface-2" />
@@ -29,11 +29,11 @@ export function MatchListSkeleton({ groups = 2, cards = 3 }: { groups?: number; 
 
 export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   return (
-    <div className="flex flex-col items-center rounded-2xl border border-dashed border-line px-6 py-16 text-center">
+    <div className="flex flex-col items-center rounded-md border-2 border-dashed border-ink bg-surface px-6 py-16 text-center">
       <span className="text-4xl" aria-hidden>
         ⚽
       </span>
-      <p className="mt-3 text-lg font-semibold">{title}</p>
+      <p className="mt-3 font-display text-3xl tracking-wide">{title}</p>
       {hint && <p className="mt-1 max-w-sm text-sm text-muted">{hint}</p>}
     </div>
   )
@@ -51,16 +51,16 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry: () => 
     : apiError?.message || 'Something went wrong while fetching matches.'
 
   return (
-    <div role="alert" className="flex flex-col items-center rounded-2xl border border-line bg-surface px-6 py-14 text-center">
+    <div role="alert" className="flex flex-col items-center rounded-md border-2 border-ink bg-surface px-6 py-14 text-center shadow-poster">
       <span className="text-4xl" aria-hidden>
         {rateLimited ? '⏳' : '⚠️'}
       </span>
-      <p className="mt-3 text-lg font-semibold">{title}</p>
+      <p className="mt-3 font-display text-3xl tracking-wide">{title}</p>
       <p className="mt-1 max-w-md text-sm text-muted">{message}</p>
       <button
         type="button"
         onClick={onRetry}
-        className="mt-5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-fg hover:opacity-90"
+        className="mt-5 rounded-md border-2 border-ink bg-accent px-4 py-2 text-sm font-bold text-accent-fg shadow-poster-sm transition-transform hover:-translate-y-px active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
       >
         Try again
       </button>

@@ -3,11 +3,20 @@ import { Navigate, Outlet, Route, Routes, useMatch, useNavigate, useParams } fro
 import { AppHeader } from './components/AppHeader'
 import { DatePickerButton } from './components/DatePickerButton'
 import { DateSlider } from './components/DateSlider'
+import { HeroBanner } from './components/HeroBanner'
 import { DayView } from './components/views/DayView'
 import { useTodayIST } from './hooks/useTodayIST'
-import { isValidDateKey } from './lib/time'
+import { ART_CREDIT } from './lib/heroArt'
+import { addDaysToKey, formatDateKey, isValidDateKey } from './lib/time'
 
-/** Today + /day/:date share this layout so the date slider stays mounted between days. */
+function heroTitle(date: string, today: string): string {
+  if (date === today) return "Today's Matches"
+  if (date === addDaysToKey(today, 1)) return "Tomorrow's Matches"
+  if (date === addDaysToKey(today, -1)) return "Yesterday's Matches"
+  return `${formatDateKey(date, 'EEEE')}'s Matches`
+}
+
+/** Today + /day/:date share this layout so the hero and date slider stay mounted between days. */
 function DayLayout() {
   const today = useTodayIST()
   const navigate = useNavigate()
@@ -22,15 +31,21 @@ function DayLayout() {
 
   return (
     <>
-      <div className="mb-6 flex items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <DateSlider selectedDate={selectedDate} onSelect={select} />
+      <HeroBanner
+        title={heroTitle(selectedDate, today)}
+        subtitle={`${formatDateKey(selectedDate, 'EEEE, d MMMM yyyy')} · times in IST`}
+      />
+      <main className="mx-auto max-w-6xl px-4 pb-8 sm:pb-10">
+        <div className="mt-3 mb-6 flex items-center gap-3 sm:mt-4">
+          <div className="min-w-0 flex-1">
+            <DateSlider selectedDate={selectedDate} onSelect={select} />
+          </div>
+          <div className="hidden sm:block">
+            <DatePickerButton value={selectedDate} onSelect={select} />
+          </div>
         </div>
-        <div className="hidden sm:block">
-          <DatePickerButton value={selectedDate} onSelect={select} />
-        </div>
-      </div>
-      <Outlet />
+        <Outlet />
+      </main>
     </>
   )
 }
@@ -46,11 +61,32 @@ function DayRoute() {
   return <DayView date={date} />
 }
 
+function AppFooter() {
+  return (
+    <footer className="border-t-2 border-ink">
+      <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-4 py-5 text-xs text-muted">
+        <p>
+          Illustrations by{' '}
+          <a href={ART_CREDIT.url} className="font-semibold text-fg underline underline-offset-2 hover:text-highlight">
+            {ART_CREDIT.name}
+          </a>
+        </p>
+        <p>
+          Match data from{' '}
+          <a href="https://www.football-data.org" className="font-semibold text-fg underline underline-offset-2 hover:text-highlight">
+            football-data.org
+          </a>
+        </p>
+      </div>
+    </footer>
+  )
+}
+
 export default function App() {
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <AppHeader />
-      <main className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+      <div className="flex-1">
         <Routes>
           <Route element={<DayLayout />}>
             <Route path="/" element={<TodayRoute />} />
@@ -58,7 +94,8 @@ export default function App() {
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </main>
+      </div>
+      <AppFooter />
     </div>
   )
 }

@@ -6,16 +6,16 @@ export function CompetitionSection({ group }: { group: CompetitionGroup }) {
   const { competition, matches } = group
   return (
     <section aria-labelledby={`comp-${competition.code}`}>
-      <header className="mb-3 flex items-center gap-2.5">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-white p-1 shadow-sm">
+      <header className="mb-4 flex items-center gap-2.5">
+        <span className="flex size-9 items-center justify-center rounded-md border-2 border-ink bg-white p-1">
           <Crest src={competition.emblem} name={competition.name} size={24} />
         </span>
-        <h2 id={`comp-${competition.code}`} className="text-base font-semibold">
+        <h2 id={`comp-${competition.code}`} className="font-display text-3xl leading-none tracking-wide">
           {competition.name}
         </h2>
-        <span className="text-sm text-muted">{matches.length}</span>
+        <span className="rounded-sm bg-fg px-1.5 text-xs leading-5 font-bold text-bg tabular-nums">{matches.length}</span>
       </header>
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {matches.map((m) => (
           <MatchCard key={m.id} match={m} />
         ))}

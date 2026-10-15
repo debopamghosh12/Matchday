@@ -2,15 +2,15 @@ import { Link } from 'react-router-dom'
 
 export function AppHeader() {
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-bg/85 backdrop-blur">
+    <header className="sticky top-0 z-20 border-b-2 border-ink bg-bg">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 font-bold tracking-tight">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-accent text-accent-fg" aria-hidden>
+        <Link to="/" className="flex items-center gap-2">
+          <span className="flex size-8 items-center justify-center rounded-md border-2 border-ink bg-accent text-accent-fg shadow-poster-sm" aria-hidden>
             ⚽
           </span>
-          <span>Matchday</span>
+          <span className="font-display text-3xl leading-none tracking-wide">Matchday</span>
         </Link>
-        <span className="rounded-full border border-line px-2.5 py-1 text-xs font-medium text-muted">IST · UTC+5:30</span>
+        <span className="rounded-sm border-2 border-ink bg-surface px-2 py-0.5 text-xs font-bold">IST · UTC+5:30</span>
       </div>
     </header>
   )
