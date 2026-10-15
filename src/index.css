@@ -34,3 +34,11 @@
 body {
   @apply bg-bg text-fg antialiased;
 }
+
+/* Horizontal strips that scroll by touch/arrows without a visible scrollbar. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
