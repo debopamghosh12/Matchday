@@ -42,3 +42,14 @@ export function addDaysToKey(dateKey: string, days: number): string {
 export function formatDateKey(dateKey: string, pattern: string): string {
   return format(parseISO(dateKey), pattern)
 }
+
+/** IST kick-off time as "HH:mm" (24h), for time-of-day rules. */
+export function istTimeOfDay(utcDate: string): string {
+  return formatInTimeZone(utcDate, IST_TZ, 'HH:mm')
+}
+
+/** Kick-off between 11 PM and 3 AM IST, both ends inclusive. */
+export function isLateNight(utcDate: string): boolean {
+  const time = istTimeOfDay(utcDate)
+  return time >= '23:00' || time <= '03:00'
+}

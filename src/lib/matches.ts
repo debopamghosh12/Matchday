@@ -83,6 +83,26 @@ export function stageLabel(match: Match): string {
 /** Display order for competitions: the big leagues first, then the rest. */
 const COMPETITION_ORDER = ['CL', 'PL', 'PD', 'SA', 'BL1', 'FL1', 'EC', 'WC', 'ELC', 'DED', 'PPL', 'BSA']
 
+const SHORT_NAME: Record<string, string> = {
+  CL: 'Champions League',
+  PL: 'Premier League',
+  PD: 'La Liga',
+  SA: 'Serie A',
+  BL1: 'Bundesliga',
+  FL1: 'Ligue 1',
+  EC: 'Euros',
+  WC: 'World Cup',
+  ELC: 'Championship',
+  DED: 'Eredivisie',
+  PPL: 'Primeira Liga',
+  BSA: 'Brasileirão',
+}
+
+/** Familiar name: "La Liga" rather than the API's "Primera Division". */
+export function competitionName(competition: { code: string; name: string }): string {
+  return SHORT_NAME[competition.code] ?? competition.name
+}
+
 export function competitionRank(code: string): number {
   const i = COMPETITION_ORDER.indexOf(code)
   return i === -1 ? COMPETITION_ORDER.length : i

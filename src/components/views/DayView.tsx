@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { formatInTimeZone } from 'date-fns-tz'
 import { useDayMatches } from '../../hooks/useDayMatches'
+import { useMatchFilters } from '../../hooks/useMatchFilters'
 import { groupByCompetition } from '../../lib/matches'
 import { IST_TZ } from '../../lib/time'
 import { CompetitionSection } from '../CompetitionSection'
@@ -12,7 +13,8 @@ export function DayView({ date }: { date: string }) {
     useDayMatches(date)
   const isToday = isLive
 
-  const groups = useMemo(() => groupByCompetition(matches), [matches])
+  const { predicate, isActive: filtered } = useMatchFilters()
+  const groups = useMemo(() => groupByCompetition(matches.filter(predicate)), [matches, predicate])
 
   return (
     <div>
@@ -29,10 +31,17 @@ export function DayView({ date }: { date: string }) {
       ) : isError && !data ? (
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : groups.length === 0 ? (
-        <EmptyState
-          title={isToday ? 'No matches today' : 'No matches on this day'}
-          hint="Try another date, or check the week view for upcoming fixtures."
-        />
+        filtered && matches.length > 0 ? (
+          <EmptyState
+            title="No matches for these filters"
+            hint={`${matches.length} ${matches.length === 1 ? 'match is' : 'matches are'} hidden by your league or late-night filters.`}
+          />
+        ) : (
+          <EmptyState
+            title={isToday ? 'No matches today' : 'No matches on this day'}
+            hint="Try another date from the strip above, or pick one further out."
+          />
+        )
       ) : (
         <div className="space-y-10">
           {groups.map((g) => (

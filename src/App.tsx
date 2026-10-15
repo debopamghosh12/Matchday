@@ -3,8 +3,11 @@ import { Navigate, Outlet, Route, Routes, useMatch, useNavigate, useParams } fro
 import { AppHeader } from './components/AppHeader'
 import { DatePickerButton } from './components/DatePickerButton'
 import { DateSlider } from './components/DateSlider'
+import { FilterBar } from './components/FilterBar'
 import { HeroBanner } from './components/HeroBanner'
+import { Toaster } from './components/Toaster'
 import { DayView } from './components/views/DayView'
+import { useMatchFilters } from './hooks/useMatchFilters'
 import { useTodayIST } from './hooks/useTodayIST'
 import { ART_CREDIT } from './lib/heroArt'
 import { addDaysToKey, formatDateKey, isValidDateKey } from './lib/time'
@@ -23,6 +26,7 @@ function DayLayout() {
   const dayMatch = useMatch('/day/:date')
   const param = dayMatch?.params.date
   const selectedDate = isValidDateKey(param) ? param : today
+  const { predicate } = useMatchFilters()
 
   const select = useCallback(
     (date: string) => navigate(date === today ? '/' : `/day/${date}`),
@@ -36,13 +40,16 @@ function DayLayout() {
         subtitle={`${formatDateKey(selectedDate, 'EEEE, d MMMM yyyy')} · times in IST`}
       />
       <main className="mx-auto max-w-6xl px-4 pb-8 sm:pb-10">
-        <div className="mt-3 mb-6 flex items-center gap-3 sm:mt-4">
+        <div className="mt-3 mb-3 flex items-center gap-3 sm:mt-4">
           <div className="min-w-0 flex-1">
-            <DateSlider selectedDate={selectedDate} onSelect={select} />
+            <DateSlider selectedDate={selectedDate} onSelect={select} filter={predicate} />
           </div>
           <div className="hidden sm:block">
             <DatePickerButton value={selectedDate} onSelect={select} />
           </div>
+        </div>
+        <div className="mb-6">
+          <FilterBar />
         </div>
         <Outlet />
       </main>
@@ -96,6 +103,7 @@ export default function App() {
         </Routes>
       </div>
       <AppFooter />
+      <Toaster />
     </div>
   )
 }

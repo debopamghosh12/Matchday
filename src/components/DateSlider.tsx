@@ -4,6 +4,7 @@ import { matchesQueryOptions } from '../hooks/useMatches'
 import { useTodayIST } from '../hooks/useTodayIST'
 import { groupByIstDate } from '../lib/matches'
 import { addDaysToKey, formatDateKey } from '../lib/time'
+import type { Match } from '../types/football'
 
 // Initial window around the selected date: 29 IST days = a 30-day UTC window
 // on the server, i.e. exactly 3 upstream calls of 10 days.
@@ -21,6 +22,8 @@ interface DateSliderProps {
   /** Selected IST date (yyyy-MM-dd). */
   selectedDate: string
   onSelect: (date: string) => void
+  /** Only count matches that pass this filter. */
+  filter?: (match: Match) => boolean
 }
 
 function initialRanges(date: string): Range[] {
@@ -38,7 +41,7 @@ function daysBetween(from: string, to: string): string[] {
  * range with one /api/matches call per loaded block and extends the range when
  * scrolled to either end. Arrow keys move the selection when focused.
  */
-export function DateSlider({ selectedDate, onSelect }: DateSliderProps) {
+export function DateSlider({ selectedDate, onSelect, filter }: DateSliderProps) {
   const today = useTodayIST()
   // `id` changes only when the window is rebuilt around a far-away date.
   const [win, setWin] = useState(() => ({ id: 0, ranges: initialRanges(selectedDate) }))
@@ -82,19 +85,20 @@ export function DateSlider({ selectedDate, onSelect }: DateSliderProps) {
   const todayLive = useQuery({ ...matchesQueryOptions(today, today, true), enabled: false })
 
   const counts = useMemo(() => {
+    const keep = (matches: Match[]) => (filter ? matches.filter(filter) : matches)
     const result = new Map<string, number | 'loading' | 'error'>()
     ranges.forEach(([from, to], i) => {
       const q = rangeQueries[i]
-      const byDate = q.data ? groupByIstDate(q.data.matches) : null
+      const byDate = q.data ? groupByIstDate(keep(q.data.matches)) : null
       for (const day of daysBetween(from, to)) {
         result.set(day, byDate ? (byDate.get(day)?.length ?? 0) : q.isError ? 'error' : 'loading')
       }
     })
     if (todayLive.data && result.has(today)) {
-      result.set(today, groupByIstDate(todayLive.data.matches).get(today)?.length ?? 0)
+      result.set(today, groupByIstDate(keep(todayLive.data.matches)).get(today)?.length ?? 0)
     }
     return result
-  }, [ranges, rangeQueries, todayLive.data, today])
+  }, [ranges, rangeQueries, todayLive.data, today, filter])
 
   const days = useMemo(() => daysBetween(start, end), [start, end])
 
