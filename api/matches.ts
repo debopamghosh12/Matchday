@@ -23,6 +23,7 @@ function touchesToday(utcFrom: string, utcTo: string): boolean {
   return diffDays(utcFrom, today) >= 0 && diffDays(addDays(today, -1), utcTo) >= 0
 }
 
+/** Fetch matches for the inclusive UTC date range [utcFrom, utcTo]. */
 async function fetchChunk(utcFrom: string, utcTo: string): Promise<Match[]> {
   const key = `matches:${utcFrom}:${utcTo}`
   const cached = cacheGet<Match[]>(key)
@@ -30,7 +31,9 @@ async function fetchChunk(utcFrom: string, utcTo: string): Promise<Match[]> {
 
   const params = new URLSearchParams({
     dateFrom: utcFrom,
-    dateTo: utcTo,
+    // Upstream dateTo is exclusive (verified: dateFrom=dateTo returns nothing),
+    // so ask for the day after the last day we want.
+    dateTo: addDays(utcTo, 1),
     competitions: FREE_COMPETITIONS.join(','),
   })
   try {

@@ -21,7 +21,7 @@ export const FREE_COMPETITIONS = [
   'WC', // FIFA World Cup
 ] as const
 
-/** Max days per /matches request we use on the free tier. */
+/** Max days per /matches request we use on the free tier (dateTo - dateFrom). */
 export const MAX_RANGE_DAYS = 10
 
 export class UpstreamError extends Error {

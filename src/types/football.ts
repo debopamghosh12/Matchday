@@ -35,6 +35,7 @@ export interface Season {
   startDate: string
   endDate: string
   currentMatchday: number | null
+  winner?: TeamRef | null
 }
 
 export interface TeamRef {
@@ -71,6 +72,7 @@ export interface Match {
   homeTeam: TeamRef
   awayTeam: TeamRef
   score: Score
+  /** Not included by the /matches list endpoint; only on /matches/{id}. */
   venue?: string | null
 }
 
