@@ -24,6 +24,11 @@ describe('formatCountdown', () => {
     expect(formatCountdown(KICKOFF, KICKOFF)).toBe('Kicking off')
     expect(formatCountdown(KICKOFF, KICKOFF + 5 * 60_000)).toBe('Kicking off')
   })
+  it('says "Awaiting result" once a still-scheduled match is 3h past kick-off', () => {
+    expect(formatCountdown(KICKOFF, KICKOFF + 3 * 60 * 60_000 - 1)).toBe('Kicking off')
+    expect(formatCountdown(KICKOFF, KICKOFF + 3 * 60 * 60_000)).toBe('Awaiting result')
+    expect(formatCountdown(KICKOFF, KICKOFF + 21 * 60 * 60_000)).toBe('Awaiting result')
+  })
   it('accepts the API utcDate string', () => {
     expect(formatCountdown('2026-10-25T19:00:00Z', before(90))).toBe('Starts in 1h 30m')
   })

@@ -5,6 +5,8 @@ import { DatePickerButton } from './components/DatePickerButton'
 import { DateSlider } from './components/DateSlider'
 import { FilterBar } from './components/FilterBar'
 import { HeroBanner } from './components/HeroBanner'
+import { OfflineBanner } from './components/OfflineBanner'
+import { ReminderScheduler } from './components/ReminderScheduler'
 import { Toaster } from './components/Toaster'
 import { DayView } from './components/views/DayView'
 import { MyTeamsView } from './components/views/MyTeamsView'
@@ -97,6 +99,7 @@ export default function App() {
   return (
     <div className="flex min-h-screen flex-col">
       <AppHeader />
+      <OfflineBanner />
       <div className="flex-1">
         <Routes>
           <Route element={<DayLayout />}>
@@ -112,6 +115,7 @@ export default function App() {
       </div>
       <AppFooter />
       <Toaster />
+      <ReminderScheduler />
     </div>
   )
 }

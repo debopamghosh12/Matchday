@@ -7,11 +7,12 @@ import { matchesCalendar, matchIcsFilename, teamName } from '../lib/matchActions
 import { competitionName, hasScore, stageLabel, statusKind } from '../lib/matches'
 import { shareMatch } from '../lib/share'
 import { formatKickoff, isLateNight } from '../lib/time'
+import { notificationsSupported, REMINDER_LEAD_MS, reminderFor, useReminders } from '../lib/reminders'
 import { showToast } from '../lib/toast'
 import { Crest } from './Crest'
 import { StatusBadge } from './StatusBadge'
 import { TeamLink } from './TeamLink'
-import { CalendarIcon, MoonIcon, ShareIcon } from './icons'
+import { BellIcon, CalendarIcon, MoonIcon, ShareIcon } from './icons'
 
 interface MatchCardProps {
   match: Match
@@ -34,37 +35,89 @@ function TeamRow({ team, goals, dimmed }: { team: TeamRef; goals: number | null;
 }
 
 /** "Starts in 2h 14m" from the page-wide 30s clock; "Kicking off" once the time has passed. */
-function Countdown({ utcDate }: { utcDate: string }) {
-  const now = useNow()
+function Countdown({ utcDate, now }: { utcDate: string; now: number }) {
   const label = formatCountdown(utcDate, now)
-  const kickingOff = label === 'Kicking off'
+  const style =
+    label === 'Kicking off'
+      ? 'border-ink bg-gold text-ink'
+      : label === 'Awaiting result'
+        ? 'border-line bg-surface-2 text-muted'
+        : 'border-line bg-surface-2 text-fg'
   return (
-    <span
-      className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase ${
-        kickingOff ? 'border-ink bg-gold text-ink' : 'border-line bg-surface-2 text-fg'
-      }`}
-    >
+    <span className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase ${style}`}>
       {label}
     </span>
   )
 }
 
-function CardButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
+interface CardButtonProps {
+  label: string
+  onClick: () => void
+  pressed?: boolean
+  children: ReactNode
+}
+
+function CardButton({ label, onClick, pressed, children }: CardButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
+      aria-pressed={pressed}
       title={label}
-      className="flex size-8 shrink-0 items-center justify-center rounded-md border-2 border-ink bg-surface transition-colors hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-highlight"
+      className={`flex size-8 shrink-0 items-center justify-center rounded-md border-2 border-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-highlight ${
+        pressed ? 'bg-gold text-ink' : 'bg-surface hover:bg-surface-2'
+      }`}
     >
       {children}
     </button>
   )
 }
 
+/** Bell: a notification 30 min before kick-off, only while the app is open (no push server). */
+function ReminderButton({ match }: { match: Match }) {
+  const { has, add, remove } = useReminders()
+  const isSet = has(match.id)
+
+  const toggle = async () => {
+    if (isSet) {
+      remove(match.id)
+      showToast('Reminder removed')
+      return
+    }
+    if (!notificationsSupported()) {
+      showToast("This browser can't show notifications. Use Add to calendar instead.", 5000)
+      return
+    }
+    if (Date.parse(match.utcDate) - Date.now() <= REMINDER_LEAD_MS) {
+      showToast('Kicks off in under 30 minutes')
+      return
+    }
+    const permission = Notification.permission === 'default' ? await Notification.requestPermission() : Notification.permission
+    if (permission !== 'granted') {
+      showToast('Notifications are blocked for this site. Use Add to calendar for a reminder.', 5000)
+      return
+    }
+    add(reminderFor(match))
+    showToast("Reminder set for 30 min before kick-off. It only fires while Matchday is open; Add to calendar works even when it's closed.", 7000)
+  }
+
+  return (
+    <CardButton
+      label={isSet ? 'Remove kick-off reminder' : 'Remind me 30 min before kick-off (only while this app is open)'}
+      pressed={isSet}
+      onClick={toggle}
+    >
+      <BellIcon className="size-4" />
+    </CardButton>
+  )
+}
+
 export function MatchCard({ match, showCompetition = false }: MatchCardProps) {
+  const now = useNow()
   const kind = statusKind(match.status)
+  // Reminders and calendar entries only make sense before kick-off.
+  const upcoming = kind === 'scheduled' && Date.parse(match.utcDate) > now
   const scored = hasScore(match)
   const { home, away } = match.score.fullTime
   const winner = kind === 'finished' ? match.score.winner : null
@@ -101,7 +154,7 @@ export function MatchCard({ match, showCompetition = false }: MatchCardProps) {
             </span>
           )}
         </span>
-        {kind === 'scheduled' ? <Countdown utcDate={match.utcDate} /> : <StatusBadge status={match.status} />}
+        {kind === 'scheduled' ? <Countdown utcDate={match.utcDate} now={now} /> : <StatusBadge status={match.status} />}
       </div>
 
       <div className="mt-3 space-y-2">
@@ -119,10 +172,13 @@ export function MatchCard({ match, showCompetition = false }: MatchCardProps) {
           {meta}
         </p>
         <div className="flex shrink-0 gap-1.5">
-          {kind === 'scheduled' && (
-            <CardButton label="Add to calendar" onClick={addToCalendar}>
-              <CalendarIcon className="size-4" />
-            </CardButton>
+          {upcoming && (
+            <>
+              <ReminderButton match={match} />
+              <CardButton label="Add to calendar" onClick={addToCalendar}>
+                <CalendarIcon className="size-4" />
+              </CardButton>
+            </>
           )}
           <CardButton label="Share match" onClick={share}>
             <ShareIcon className="size-4" />

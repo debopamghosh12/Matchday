@@ -1,4 +1,4 @@
-// Dev-only Vite plugin that serves /api/* by loading the matching file under api/
+// Vite plugin (dev + preview) that serves /api/* by loading the matching file under api/
 // and calling its exported handler (Web Request -> Response), the same signature
 // Vercel uses in production. Lets `npm run dev` work without the Vercel CLI.
 //
@@ -11,7 +11,8 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import type { Plugin } from 'vite'
+import type { IncomingMessage, ServerResponse } from 'node:http'
+import { createServer, type Connect, type Plugin } from 'vite'
 
 const SEGMENT = /^[A-Za-z0-9-]+$/
 
@@ -50,50 +51,74 @@ export function resolveApiFile(apiRoot: string, segments: string[]): string | nu
   return null
 }
 
+type ModuleLoader = (file: string) => Promise<Record<string, unknown>>
+type Middleware = Connect.NextHandleFunction
+
+/** Connect middleware that serves /api/* by loading handler modules with `load`. */
+function apiMiddleware(root: string, load: ModuleLoader, fixStack?: (err: Error) => void): Middleware {
+  return async (req: IncomingMessage, res: ServerResponse, next: (err?: unknown) => void) => {
+    // Source files under api/ requested as modules (e.g. /api/_lib/x.ts) are Vite's to serve.
+    if (!req.url?.startsWith('/api/') || /\.[cm]?[jt]sx?($|\?)/.test(req.url)) return next()
+
+    const url = new URL(req.url, `http://${req.headers.host ?? 'localhost'}`)
+    const segments = url.pathname.slice('/api/'.length).split('/').filter(Boolean)
+    const file = resolveApiFile(path.join(root, 'api'), segments)
+
+    const sendJson = (status: number, body: unknown) => {
+      res.statusCode = status
+      res.setHeader('Content-Type', 'application/json')
+      res.end(JSON.stringify(body))
+    }
+
+    if (!file) return sendJson(404, { error: `No API route ${url.pathname}`, status: 404 })
+
+    try {
+      const mod = await load(file)
+      const method = req.method ?? 'GET'
+      const handler = mod[method]
+      if (typeof handler !== 'function') {
+        return sendJson(405, { error: `${method} not allowed`, status: 405 })
+      }
+
+      const headers = new Headers()
+      for (const [key, value] of Object.entries(req.headers)) {
+        if (typeof value === 'string') headers.set(key, value)
+        else if (Array.isArray(value)) value.forEach((v) => headers.append(key, v))
+      }
+
+      const response: Response = await handler(new Request(url, { method, headers }))
+      res.statusCode = response.status
+      response.headers.forEach((value, key) => res.setHeader(key, value))
+      res.end(Buffer.from(await response.arrayBuffer()))
+    } catch (err) {
+      if (err instanceof Error) fixStack?.(err)
+      next(err)
+    }
+  }
+}
+
 export function apiDevMiddleware(): Plugin {
   return {
     name: 'api-dev-middleware',
     apply: 'serve',
     configureServer(server) {
-      server.middlewares.use(async (req, res, next) => {
-        // Source files under api/ requested as modules (e.g. /api/_lib/x.ts) are Vite's to serve.
-        if (!req.url?.startsWith('/api/') || /\.[cm]?[jt]sx?($|\?)/.test(req.url)) return next()
-
-        const url = new URL(req.url, `http://${req.headers.host ?? 'localhost'}`)
-        const segments = url.pathname.slice('/api/'.length).split('/').filter(Boolean)
-        const file = resolveApiFile(path.join(server.config.root, 'api'), segments)
-
-        const sendJson = (status: number, body: unknown) => {
-          res.statusCode = status
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify(body))
-        }
-
-        if (!file) return sendJson(404, { error: `No API route ${url.pathname}`, status: 404 })
-
-        try {
-          const mod = await server.ssrLoadModule(file)
-          const method = req.method ?? 'GET'
-          const handler = mod[method]
-          if (typeof handler !== 'function') {
-            return sendJson(405, { error: `${method} not allowed`, status: 405 })
-          }
-
-          const headers = new Headers()
-          for (const [key, value] of Object.entries(req.headers)) {
-            if (typeof value === 'string') headers.set(key, value)
-            else if (Array.isArray(value)) value.forEach((v) => headers.append(key, v))
-          }
-
-          const response: Response = await handler(new Request(url, { method, headers }))
-          res.statusCode = response.status
-          response.headers.forEach((value, key) => res.setHeader(key, value))
-          res.end(Buffer.from(await response.arrayBuffer()))
-        } catch (err) {
-          if (err instanceof Error) server.ssrFixStacktrace(err)
-          next(err)
-        }
+      server.middlewares.use(
+        apiMiddleware(server.config.root, (file) => server.ssrLoadModule(file), (err) => server.ssrFixStacktrace(err)),
+      )
+    },
+    // `vite preview` (production build + service worker) gets the same API, loaded
+    // through a bare Vite instance used only to compile the TypeScript handlers.
+    async configurePreviewServer(server) {
+      const loader = await createServer({
+        configFile: false,
+        root: server.config.root,
+        logLevel: 'error',
+        appType: 'custom',
+        server: { middlewareMode: true, hmr: false, ws: false },
+        optimizeDeps: { noDiscovery: true, include: [] },
       })
+      server.httpServer.once('close', () => void loader.close())
+      server.middlewares.use(apiMiddleware(server.config.root, (file) => loader.ssrLoadModule(file)))
     },
   }
 }

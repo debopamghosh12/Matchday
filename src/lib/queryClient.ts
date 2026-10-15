@@ -22,6 +22,9 @@ export const queryClient = new QueryClient({
         return Math.min(2000 * 2 ** attempt, 30_000)
       },
       refetchOnWindowFocus: false,
+      // Always try the request: offline, the service worker answers from its cache
+      // (React Query's default 'online' mode would pause instead).
+      networkMode: 'offlineFirst',
     },
   },
 })

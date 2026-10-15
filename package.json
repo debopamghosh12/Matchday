@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "art": "node scripts/build-art.mjs",
     "test": "vitest run",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "icons": "node scripts/build-icons.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.3",
@@ -36,6 +37,7 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
     "vite": "^6.3.5",
+    "vite-plugin-pwa": "^1.3.0",
     "vitest": "^3.2.7"
   }
 }
