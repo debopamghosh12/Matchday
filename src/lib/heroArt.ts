@@ -14,6 +14,9 @@ export const HERO_ART: { file: string; position: string }[] = [
 
 export const HERO_WIDTHS = [800, 1600] as const
 
+/** The art panel's rendered width: full width on phones, 62% (max 900px) from 640px up. */
+export const HERO_SIZES = '(min-width: 640px) min(62vw, 900px), 100vw'
+
 export function heroSrcSet(file: string): string {
   return HERO_WIDTHS.map((w) => `/art/webp/${file}-${w}.webp ${w}w`).join(', ')
 }

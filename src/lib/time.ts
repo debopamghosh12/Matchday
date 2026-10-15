@@ -6,9 +6,29 @@ import { formatInTimeZone } from 'date-fns-tz'
 
 export const IST_TZ = 'Asia/Kolkata'
 
+/**
+ * Memoises a formatter of API timestamps. The same few hundred kick-off strings are
+ * formatted over and over (grouping, filtering, counting); Intl formatting is slow
+ * enough that this shows up as main-thread time when a range of matches arrives.
+ */
+function memoByString(format: (utc: string) => string): (utc: string) => string {
+  const cache = new Map<string, string>()
+  return (utc) => {
+    let value = cache.get(utc)
+    if (value === undefined) {
+      if (cache.size >= 5000) cache.clear()
+      value = format(utc)
+      cache.set(utc, value)
+    }
+    return value
+  }
+}
+
+const istDateOfString = memoByString((utc) => formatInTimeZone(utc, IST_TZ, 'yyyy-MM-dd'))
+
 /** IST calendar date (yyyy-MM-dd) of an instant. Defaults to now. */
 export function istDateKey(instant: Date | string | number = new Date()): string {
-  return formatInTimeZone(instant, IST_TZ, 'yyyy-MM-dd')
+  return typeof instant === 'string' ? istDateOfString(instant) : formatInTimeZone(instant, IST_TZ, 'yyyy-MM-dd')
 }
 
 export function todayIST(): string {
@@ -44,9 +64,7 @@ export function formatDateKey(dateKey: string, pattern: string): string {
 }
 
 /** IST kick-off time as "HH:mm" (24h), for time-of-day rules. */
-export function istTimeOfDay(utcDate: string): string {
-  return formatInTimeZone(utcDate, IST_TZ, 'HH:mm')
-}
+export const istTimeOfDay = memoByString((utcDate) => formatInTimeZone(utcDate, IST_TZ, 'HH:mm'))
 
 /** Kick-off between 11 PM and 3 AM IST, both ends inclusive. */
 export function isLateNight(utcDate: string): boolean {

@@ -1,22 +1,57 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { usePageVisible } from '../hooks/usePageVisible'
 import { useReducedMotion } from '../hooks/useReducedMotion'
-import { HERO_ART, heroSrcSet } from '../lib/heroArt'
+import { HERO_ART, HERO_SIZES, heroSrcSet } from '../lib/heroArt'
 
 const ROTATE_MS = 6000
+
+/**
+ * Calls `done` once `img` is on screen. Where the browser reports largest-contentful-
+ * paint (Chromium) we wait for that entry, which is dispatched after the frame is
+ * presented; elsewhere, after decoding plus two animation frames.
+ */
+function whenPainted(img: HTMLImageElement, done: () => void) {
+  let called = false
+  const finish = () => {
+    if (called) return
+    called = true
+    done()
+  }
+  if (PerformanceObserver.supportedEntryTypes?.includes('largest-contentful-paint')) {
+    const observer = new PerformanceObserver((list) => {
+      if (list.getEntries().some((e) => (e as PerformanceEntry & { element?: Element }).element === img)) {
+        observer.disconnect()
+        finish()
+      }
+    })
+    observer.observe({ type: 'largest-contentful-paint', buffered: true })
+    // Not every paint becomes an LCP entry (e.g. something larger came first); don't wait forever.
+    setTimeout(() => {
+      observer.disconnect()
+      finish()
+    }, 1000)
+    return
+  }
+  void img
+    .decode()
+    .catch(() => undefined)
+    .then(() => requestAnimationFrame(() => requestAnimationFrame(finish)))
+}
 
 interface HeroBannerProps {
   title: ReactNode
   subtitle?: ReactNode
+  /** Called once the first image has decoded and been painted. */
+  onFirstPaint?: () => void
 }
 
 /**
  * Full-width artwork banner that crossfades through HERO_ART every 6s.
  * Only the first image loads up front; each next one is mounted (and so fetched)
- * while the current one is showing, and the fade waits until it has loaded.
+ * once the current one has loaded, and the fade waits until it has loaded too.
  * Pauses while the tab is hidden; with reduced motion it shows the first image only.
  */
-export function HeroBanner({ title, subtitle }: HeroBannerProps) {
+export function HeroBanner({ title, subtitle, onFirstPaint }: HeroBannerProps) {
   const reducedMotion = useReducedMotion()
   const visible = usePageVisible()
   const rotating = !reducedMotion && HERO_ART.length > 1
@@ -40,6 +75,11 @@ export function HeroBanner({ title, subtitle }: HeroBannerProps) {
 
   const markLoaded = (i: number) => setLoaded((s) => (s.has(i) ? s : new Set(s).add(i)))
 
+  const onLoad = (i: number, img: HTMLImageElement) => {
+    markLoaded(i)
+    if (i === 0 && onFirstPaint) whenPainted(img, onFirstPaint)
+  }
+
   return (
     <div className="relative h-[200px] overflow-hidden bg-bg sm:h-[280px]">
       {/*
@@ -48,9 +88,11 @@ export function HeroBanner({ title, subtitle }: HeroBannerProps) {
       */}
       <div className="absolute inset-y-0 right-0 w-full sm:w-[62%] sm:max-w-[900px] sm:[mask-image:linear-gradient(to_right,transparent,black_40%)]">
         {HERO_ART.map((art, i) => {
-          // Render: the current image, the previous (under the fade), the next (preloading),
+          // Render: the current image, the previous (under the fade), the next (preloading,
+          // but only once the current one has loaded so they don't compete for bandwidth),
           // and anything already loaded so returning to it doesn't refetch.
-          const mounted = i === current || (rotating && (i === prev || i === next || loaded.has(i)))
+          const mounted =
+            i === current || (rotating && (i === prev || (i === next && loaded.has(current)) || loaded.has(i)))
           if (!mounted) return null
           const layer = i === current ? 'z-[2] opacity-100' : i === prev ? 'z-[1] opacity-100' : 'z-0 opacity-0'
           return (
@@ -58,12 +100,13 @@ export function HeroBanner({ title, subtitle }: HeroBannerProps) {
               key={art.file}
               src={`/art/webp/${art.file}-800.webp`}
               srcSet={heroSrcSet(art.file)}
-              sizes="(min-width: 640px) min(62vw, 900px), 100vw"
+              sizes={HERO_SIZES}
               alt=""
-              decoding="async"
+              // The first image is the page's largest paint: decode it with the first frame.
+              decoding={i === 0 ? 'sync' : 'async'}
               loading={i === 0 ? 'eager' : 'lazy'}
               fetchPriority={i === 0 ? 'high' : 'low'}
-              onLoad={() => markLoaded(i)}
+              onLoad={(e) => onLoad(i, e.currentTarget)}
               style={{ objectPosition: art.position }}
               className={`absolute inset-0 size-full object-cover transition-opacity duration-[1800ms] ease-in-out ${layer}`}
             />

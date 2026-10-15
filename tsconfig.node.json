@@ -21,5 +21,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts", "dev"]
+  "include": ["vite.config.ts", "dev", "src/lib/heroArt.ts"]
 }
