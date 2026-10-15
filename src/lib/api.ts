@@ -1,6 +1,12 @@
 // Client for our own /api proxy (never calls football-data.org directly).
 
-import type { ApiErrorBody, CompetitionsResponse, MatchesResponse } from '../types/football'
+import type {
+  ApiErrorBody,
+  CompetitionsResponse,
+  MatchesResponse,
+  ScorersResponse,
+  StandingsResponse,
+} from '../types/football'
 
 export class ApiError extends Error {
   status: number
@@ -46,4 +52,12 @@ export function fetchMatches(from: string, to: string, signal?: AbortSignal) {
 
 export function fetchCompetitions(signal?: AbortSignal) {
   return getJson<CompetitionsResponse>('/api/competitions', signal)
+}
+
+export function fetchStandings(code: string) {
+  return getJson<StandingsResponse>(`/api/standings/${encodeURIComponent(code)}`)
+}
+
+export function fetchScorers(code: string) {
+  return getJson<ScorersResponse>(`/api/scorers/${encodeURIComponent(code)}`)
 }

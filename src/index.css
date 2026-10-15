@@ -30,6 +30,17 @@
   --color-highlight: var(--color-cobalt); /* accent-coloured text and focus rings */
   --color-live: var(--color-flare);
 
+  /* Form pills (same in both themes; text pairs checked for AA). */
+  --color-win: #1e6b43;
+  --color-draw: #cfc6b0;
+
+  /* League-table zone markers (non-text, at least 3:1 against cards in each theme). */
+  --color-zone-top: #2f5fb3;
+  --color-zone-second: #b7791f;
+  --color-zone-third: #1e6b43;
+  --color-zone-playoff: #7b4fb3;
+  --color-zone-down: #c2381f;
+
   --shadow-poster: 4px 4px 0 var(--color-ink);
   --shadow-poster-sm: 2px 2px 0 var(--color-ink);
   --shadow-poster-live: 4px 4px 0 var(--color-flare);
@@ -43,6 +54,11 @@
   --color-fg: var(--color-cream);
   --color-muted: #bfcae0;
   --color-highlight: var(--color-gold);
+  --color-zone-top: #7fb0ff;
+  --color-zone-second: #f2b531;
+  --color-zone-third: #5fd39a;
+  --color-zone-playoff: #c9a8ff;
+  --color-zone-down: #ff7a5c;
   color-scheme: dark;
 }
 
