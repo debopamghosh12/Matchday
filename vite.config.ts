@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   // Make server-only secrets from .env / .env.local available to the /api
   // handlers in dev. They are NOT exposed to client code (no VITE_ prefix).
   const env = loadEnv(mode, process.cwd(), '')
-  process.env.FOOTBALL_DATA_API_KEY ??= env.FOOTBALL_DATA_API_KEY
+  if (env.FOOTBALL_DATA_API_KEY) process.env.FOOTBALL_DATA_API_KEY = env.FOOTBALL_DATA_API_KEY
 
   return {
     plugins: [react(), tailwindcss(), apiDevMiddleware()],
