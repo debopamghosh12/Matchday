@@ -23,12 +23,25 @@ function touchesToday(utcFrom: string, utcTo: string): boolean {
   return diffDays(utcFrom, today) >= 0 && diffDays(addDays(today, -1), utcTo) >= 0
 }
 
+// Upstream calls in progress, so concurrent requests for the same chunk on a
+// warm instance share one call instead of each spending rate limit.
+const inFlight = new Map<string, Promise<Match[]>>()
+
 /** Fetch matches for the inclusive UTC date range [utcFrom, utcTo]. */
-async function fetchChunk(utcFrom: string, utcTo: string): Promise<Match[]> {
+function fetchChunk(utcFrom: string, utcTo: string): Promise<Match[]> {
   const key = `matches:${utcFrom}:${utcTo}`
   const cached = cacheGet<Match[]>(key)
-  if (cached) return cached
+  if (cached) return Promise.resolve(cached)
 
+  let pending = inFlight.get(key)
+  if (!pending) {
+    pending = fetchChunkUpstream(key, utcFrom, utcTo).finally(() => inFlight.delete(key))
+    inFlight.set(key, pending)
+  }
+  return pending
+}
+
+async function fetchChunkUpstream(key: string, utcFrom: string, utcTo: string): Promise<Match[]> {
   const params = new URLSearchParams({
     dateFrom: utcFrom,
     // Upstream dateTo is exclusive (verified: dateFrom=dateTo returns nothing),
