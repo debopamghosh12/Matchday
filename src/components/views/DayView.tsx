@@ -1,19 +1,18 @@
 import { useMemo } from 'react'
 import { formatInTimeZone } from 'date-fns-tz'
-import { useMatches } from '../../hooks/useMatches'
+import { useDayMatches } from '../../hooks/useDayMatches'
 import { groupByCompetition } from '../../lib/matches'
-import { formatDateKey, IST_TZ, todayIST } from '../../lib/time'
+import { formatDateKey, IST_TZ } from '../../lib/time'
 import { CompetitionSection } from '../CompetitionSection'
 import { EmptyState, ErrorState, MatchListSkeleton } from '../States'
 
 /** All matches on one IST date, grouped by competition. */
 export function DayView({ date }: { date: string }) {
-  const isToday = date === todayIST()
-  const { data, error, isPending, isError, isFetching, isPlaceholderData, dataUpdatedAt, refetch } =
-    useMatches(date, date)
+  const { matches, data, error, isPending, isError, isFetching, isStale, dataUpdatedAt, refetch, isLive } =
+    useDayMatches(date)
+  const isToday = isLive
 
-  const groups = useMemo(() => groupByCompetition(data?.matches ?? []), [data])
-  const showingOtherDay = isPlaceholderData && data?.from !== date
+  const groups = useMemo(() => groupByCompetition(matches), [matches])
 
   return (
     <div>
@@ -30,7 +29,7 @@ export function DayView({ date }: { date: string }) {
         )}
       </div>
 
-      {isPending || showingOtherDay ? (
+      {isPending || isStale ? (
         <MatchListSkeleton />
       ) : isError && !data ? (
         <ErrorState error={error} onRetry={() => refetch()} />
