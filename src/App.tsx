@@ -7,8 +7,10 @@ import { FilterBar } from './components/FilterBar'
 import { HeroBanner } from './components/HeroBanner'
 import { Toaster } from './components/Toaster'
 import { DayView } from './components/views/DayView'
+import { MyTeamsView } from './components/views/MyTeamsView'
 import { ScorersView } from './components/views/ScorersView'
 import { TablesView } from './components/views/TablesView'
+import { TeamView } from './components/views/TeamView'
 import { useMatchFilters } from './hooks/useMatchFilters'
 import { useTodayIST } from './hooks/useTodayIST'
 import { ART_CREDIT } from './lib/heroArt'
@@ -103,6 +105,8 @@ export default function App() {
           </Route>
           <Route path="/tables/:code?" element={<TablesView />} />
           <Route path="/scorers/:code?" element={<ScorersView />} />
+          <Route path="/team/:id" element={<TeamView />} />
+          <Route path="/my-teams" element={<MyTeamsView />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

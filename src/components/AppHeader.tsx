@@ -1,13 +1,16 @@
 import { Link, NavLink, useLocation } from 'react-router-dom'
+import { useFavourites } from '../hooks/useFavourites'
 
 const NAV = [
   { to: '/', label: 'Matches' },
   { to: '/tables', label: 'Tables' },
   { to: '/scorers', label: 'Scorers' },
+  { to: '/my-teams', label: 'My Teams' },
 ]
 
 export function AppHeader() {
   const { pathname } = useLocation()
+  const { teams } = useFavourites()
   // "Matches" covers Today and every /day/:date page.
   const isActive = (to: string) => (to === '/' ? pathname === '/' || pathname.startsWith('/day/') : pathname.startsWith(to))
 
@@ -37,6 +40,12 @@ export function AppHeader() {
                   }`}
                 >
                   {item.label}
+                  {item.to === '/my-teams' && teams.length > 0 && (
+                    <span className="ml-1.5 rounded-sm bg-gold px-1 text-[11px] leading-4 text-ink tabular-nums">
+                      {teams.length}
+                      <span className="sr-only"> followed</span>
+                    </span>
+                  )}
                 </NavLink>
               </li>
             ))}

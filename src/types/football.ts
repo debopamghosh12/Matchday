@@ -151,6 +151,34 @@ export interface ScorersResponse {
   fetchedAt: string
 }
 
+// --- Teams -----------------------------------------------------------------------
+
+/** Shape returned by our own /api/teams/:id proxy. */
+export interface TeamDetails {
+  id: number
+  name: string
+  shortName: string | null
+  tla: string | null
+  crest: string | null
+  area: Area | null
+  venue: string | null
+  founded: number | null
+  /** e.g. "Sky Blue / White" */
+  clubColors: string | null
+  website: string | null
+  runningCompetitions: CompetitionRef[]
+}
+
+/** Shape returned by our own /api/teams/:id/matches proxy. */
+export interface TeamMatchesResponse {
+  teamId: number
+  /** IST dates, inclusive: 30 days back to 60 days ahead. */
+  from: string
+  to: string
+  matches: Match[]
+  fetchedAt: string
+}
+
 /** Error body returned by our proxy on failure. */
 export interface ApiErrorBody {
   error: string

@@ -9,7 +9,7 @@ export function MatchListSkeleton({ groups = 2, cards = 3 }: { groups?: number; 
             <div className="size-9 rounded-md bg-surface-2" />
             <div className="h-6 w-44 rounded bg-surface-2" />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: cards }, (_, c) => (
               <div key={c} className="h-[136px] rounded-md border-2 border-ink bg-surface p-4 shadow-poster">
                 <div className="flex justify-between">

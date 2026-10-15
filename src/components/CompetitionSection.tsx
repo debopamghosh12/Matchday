@@ -15,7 +15,7 @@ export function CompetitionSection({ group }: { group: CompetitionGroup }) {
         </h2>
         <span className="rounded-sm bg-fg px-1.5 text-xs leading-5 font-bold text-bg tabular-nums">{matches.length}</span>
       </header>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {matches.map((m) => (
           <MatchCard key={m.id} match={m} />
         ))}

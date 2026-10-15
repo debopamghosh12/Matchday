@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Match } from '../../src/types/football.js'
+import type { Match } from '../types/football.js'
 import { formFromMatches, parseForm, resultFor } from './form.js'
 
 function match(id: number, utcDate: string, home: number, away: number, score: [number | null, number | null], status = 'FINISHED'): Match {

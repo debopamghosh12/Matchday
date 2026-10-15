@@ -6,6 +6,8 @@ import type {
   MatchesResponse,
   ScorersResponse,
   StandingsResponse,
+  TeamDetails,
+  TeamMatchesResponse,
 } from '../types/football'
 
 export class ApiError extends Error {
@@ -60,4 +62,12 @@ export function fetchStandings(code: string) {
 
 export function fetchScorers(code: string) {
   return getJson<ScorersResponse>(`/api/scorers/${encodeURIComponent(code)}`)
+}
+
+export function fetchTeam(id: number) {
+  return getJson<TeamDetails>(`/api/teams/${id}`)
+}
+
+export function fetchTeamMatches(id: number) {
+  return getJson<TeamMatchesResponse>(`/api/teams/${id}/matches`)
 }

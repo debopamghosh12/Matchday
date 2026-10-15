@@ -1,4 +1,6 @@
-import type { FormResult, Match } from '../../src/types/football.js'
+// Shared by the standings endpoint (server) and the team page (browser).
+
+import type { FormResult, Match } from '../types/football.js'
 
 /** "W,D,L" (as the paid tiers send it) -> ['W', 'D', 'L']. */
 export function parseForm(form: string | null): FormResult[] | null {

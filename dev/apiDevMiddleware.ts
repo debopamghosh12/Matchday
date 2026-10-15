@@ -56,7 +56,8 @@ export function apiDevMiddleware(): Plugin {
     apply: 'serve',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        if (!req.url?.startsWith('/api/')) return next()
+        // Source files under api/ requested as modules (e.g. /api/_lib/x.ts) are Vite's to serve.
+        if (!req.url?.startsWith('/api/') || /\.[cm]?[jt]sx?($|\?)/.test(req.url)) return next()
 
         const url = new URL(req.url, `http://${req.headers.host ?? 'localhost'}`)
         const segments = url.pathname.slice('/api/'.length).split('/').filter(Boolean)

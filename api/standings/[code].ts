@@ -13,7 +13,7 @@ import type {
   StandingsResponse,
 } from '../../src/types/football.js'
 import { cachedFetch } from '../_lib/cachedFetch.js'
-import { formFromMatches, parseForm } from '../_lib/form.js'
+import { formFromMatches, parseForm } from '../../src/lib/form.js'
 import { cacheControl, errorResponse, json } from '../_lib/http.js'
 import { competitionCode, pathSegments } from '../_lib/params.js'
 

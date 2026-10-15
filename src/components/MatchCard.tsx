@@ -10,6 +10,7 @@ import { formatKickoff, isLateNight } from '../lib/time'
 import { showToast } from '../lib/toast'
 import { Crest } from './Crest'
 import { StatusBadge } from './StatusBadge'
+import { TeamLink } from './TeamLink'
 import { CalendarIcon, MoonIcon, ShareIcon } from './icons'
 
 interface MatchCardProps {
@@ -21,10 +22,12 @@ interface MatchCardProps {
 function TeamRow({ team, goals, dimmed }: { team: TeamRef; goals: number | null; dimmed: boolean }) {
   return (
     <div className={`flex items-center gap-2.5 ${dimmed ? 'text-muted' : ''}`}>
-      <Crest src={team.crest} name={teamName(team)} size={22} />
-      <span className="min-w-0 flex-1 truncate font-medium" title={team.name ?? undefined}>
-        {teamName(team)}
-      </span>
+      <TeamLink team={team} className="flex min-w-0 flex-1 items-center gap-2.5">
+        <Crest src={team.crest} name={teamName(team)} size={22} />
+        <span className="truncate font-medium" title={team.name ?? undefined}>
+          {teamName(team)}
+        </span>
+      </TeamLink>
       {goals !== null && <span className="w-6 text-right font-display text-2xl leading-none tabular-nums">{goals}</span>}
     </div>
   )
@@ -82,7 +85,7 @@ export function MatchCard({ match, showCompetition = false }: MatchCardProps) {
 
   return (
     <article
-      className={`flex flex-col rounded-md border-2 border-ink bg-surface p-3 sm:p-4 ${
+      className={`flex min-w-0 flex-col rounded-md border-2 border-ink bg-surface p-3 sm:p-4 ${
         kind === 'live' ? 'shadow-poster-live' : 'shadow-poster'
       }`}
     >
@@ -108,7 +111,11 @@ export function MatchCard({ match, showCompetition = false }: MatchCardProps) {
 
       <div className="mt-auto flex items-end justify-between gap-2 pt-3">
         <p className="flex min-w-0 items-center gap-1.5 truncate text-xs text-muted">
-          {showCompetition && <Crest src={match.competition.emblem} name={match.competition.name} size={14} />}
+          {showCompetition && (
+            <span className="flex shrink-0 rounded-sm bg-white p-px">
+              <Crest src={match.competition.emblem} name={match.competition.name} size={14} />
+            </span>
+          )}
           {meta}
         </p>
         <div className="flex shrink-0 gap-1.5">
