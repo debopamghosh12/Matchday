@@ -1,1 +1,36 @@
 @import "tailwindcss";
+
+/* Dark mode is driven by a `.dark` class on <html> (dark is the default). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Colour tokens. Light values here; dark overrides below. */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-bg: #f3f5f8;
+  --color-surface: #ffffff;
+  --color-surface-2: #eceff4;
+  --color-line: #dde2ea;
+  --color-fg: #0f172a;
+  --color-muted: #5d687a;
+  --color-accent: #059669;
+  --color-accent-fg: #ffffff;
+  --color-live: #dc2626;
+}
+
+.dark {
+  --color-bg: #0a0e15;
+  --color-surface: #121924;
+  --color-surface-2: #1a2331;
+  --color-line: #232e40;
+  --color-fg: #e7ecf3;
+  --color-muted: #8a96a9;
+  --color-accent: #34d399;
+  --color-accent-fg: #052e1f;
+  --color-live: #f87171;
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-bg text-fg antialiased;
+}

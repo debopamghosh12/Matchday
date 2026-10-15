@@ -1,8 +1,31 @@
+import { Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { AppHeader } from './components/AppHeader'
+import { DayView } from './components/views/DayView'
+import { useTodayIST } from './hooks/useTodayIST'
+import { isValidDateKey } from './lib/time'
+
+function TodayRoute() {
+  const today = useTodayIST()
+  return <DayView date={today} />
+}
+
+function DayRoute() {
+  const { date } = useParams()
+  if (!isValidDateKey(date)) return <Navigate to="/" replace />
+  return <DayView date={date} />
+}
+
 export default function App() {
   return (
-    <main className="min-h-screen bg-slate-950 p-8 text-slate-100">
-      <h1 className="text-2xl font-bold">Football Match Calendar</h1>
-      <p className="mt-2 text-slate-400">Scaffold ready. Views coming next.</p>
-    </main>
+    <div className="min-h-screen">
+      <AppHeader />
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+        <Routes>
+          <Route path="/" element={<TodayRoute />} />
+          <Route path="/day/:date" element={<DayRoute />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+    </div>
   )
 }
